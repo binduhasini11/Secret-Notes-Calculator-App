@@ -16,9 +16,7 @@ body{
   color:#fff;
 }
 
-.container{
-  position:relative;
-}
+.container{ position:relative; }
 
 /* ---------- CALCULATOR ---------- */
 .calculator{
@@ -72,70 +70,137 @@ button:active{ background:#3a3a3a; }
 
 .hidden{ display:none; }
 
-/* ---------- VAULT ---------- */
-.notes{
-  width:320px;
-  background:#1b1b1b;
-  border-radius:8px;
-  padding:10px;
-  animation:fadeIn 0.4s ease;
-}
-
-.notes h3{
-  font-weight:400;
-  font-size:14px;
-  opacity:0.6;
-  text-align:center;
-}
-
-.notes textarea{
-  width:100%;
-  height:80px;
-  background:#000;
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  padding:8px;
-  margin-top:8px;
-  resize:none;
-}
-
-.note{
-  background:#222;
-  padding:8px;
-  border-radius:6px;
-  margin-top:6px;
-  font-size:14px;
-}
-
-/* ---------- VAULT TRANSITION ---------- */
+/* ---------- GLITCH OVERLAY ---------- */
 .overlay{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,0.85);
+  background:#000;
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:14px;
-  letter-spacing:2px;
+  letter-spacing:4px;
+  color:#39ff14;
   opacity:0;
   pointer-events:none;
+  text-shadow:
+    2px 0 red,
+   -2px 0 cyan;
 }
 
 .overlay.active{
-  animation:unlock 0.8s ease forwards;
+  animation:glitchFlash 0.45s linear forwards;
 }
 
-@keyframes unlock{
-  0%{opacity:0}
-  20%{opacity:1}
-  80%{opacity:1}
-  100%{opacity:0}
+@keyframes glitchFlash{
+  0%{opacity:0; transform:none;}
+  10%{opacity:1; transform:translateX(-2px);}
+  20%{transform:translateX(2px);}
+  30%{transform:translateY(-1px);}
+  40%{transform:translateY(1px);}
+  60%{opacity:1;}
+  100%{opacity:0;}
 }
 
+/* ---------- VAULT ---------- */
+.notes{
+  width:320px;
+  background:#0c0c0c;
+  border-radius:8px;
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+  animation:fadeIn 0.5s ease;
+}
+
+/* Scanlines */
+.notes::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03),
+    rgba(255,255,255,0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events:none;
+  animation:scan 6s linear infinite;
+}
+
+/* Grain */
+.notes::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+
+.notes-header{
+  text-align:center;
+  font-size:12px;
+  letter-spacing:4px;
+  opacity:0.5;
+  margin-bottom:10px;
+}
+
+.notes textarea{
+  width:100%;
+  height:70px;
+  background:#000;
+  color:#fff;
+  border:1px solid #222;
+  border-radius:6px;
+  padding:8px;
+  resize:none;
+  outline:none;
+}
+
+.notes textarea:focus{
+  box-shadow:0 0 14px rgba(57,255,20,0.5);
+}
+
+.notes-list{
+  margin-top:12px;
+  max-height:180px;
+  overflow-y:auto;
+}
+
+.note{
+  background:#111;
+  padding:10px;
+  border-radius:6px;
+  margin-bottom:10px;
+  box-shadow:0 10px 20px rgba(0,0,0,0.6);
+  animation:float 6s ease-in-out infinite;
+}
+
+.note-time{
+  font-size:11px;
+  opacity:0.4;
+  margin-bottom:4px;
+}
+
+.empty{
+  text-align:center;
+  font-size:13px;
+  opacity:0.3;
+  margin-top:30px;
+}
+
+@keyframes scan{
+  from{background-position-y:0}
+  to{background-position-y:100%}
+}
 @keyframes fadeIn{
-  from{opacity:0; transform:scale(0.98)}
+  from{opacity:0; transform:scale(0.96)}
   to{opacity:1; transform:scale(1)}
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-2px)}
 }
 </style>
 </head>
@@ -156,32 +221,30 @@ button:active{ background:#3a3a3a; }
       <button onclick="p('8')">8</button>
       <button onclick="p('9')">9</button>
       <button class="operator" onclick="p('/')">÷</button>
-
       <button onclick="p('4')">4</button>
       <button onclick="p('5')">5</button>
       <button onclick="p('6')">6</button>
       <button class="operator" onclick="p('*')">×</button>
-
       <button onclick="p('1')">1</button>
       <button onclick="p('2')">2</button>
       <button onclick="p('3')">3</button>
       <button class="operator" onclick="p('-')">−</button>
-
       <button onclick="p('0')">0</button>
       <button onclick="del()">DEL</button>
       <button class="clear" onclick="clr()">C</button>
       <button class="operator" onclick="p('+')">+</button>
-
       <button class="equal" onclick="calc()">=</button>
     </div>
   </div>
 
   <div class="notes hidden" id="notes">
-    <h3>Notes</h3>
-    <textarea id="noteText" placeholder="Write something..."></textarea>
-    <button style="width:100%;margin-top:6px" onclick="add()">Save</button>
-    <div id="noteList"></div>
-    <button style="width:100%;margin-top:6px" onclick="exit()">Back</button>
+    <div class="notes-header">VAULT</div>
+    <textarea id="noteText" placeholder="For the record and only for those meant to find it..."></textarea>
+    <button onclick="add()">Save</button>
+    <div class="notes-list" id="noteList">
+      <div class="empty">No entries detected</div>
+    </div>
+    <button onclick="exit()">Back</button>
   </div>
 </div>
 
@@ -202,7 +265,7 @@ function calc(){
       document.getElementById("calc").classList.add("hidden");
       document.getElementById("notes").classList.remove("hidden");
       overlay.classList.remove("active");
-    },700);
+    },450);
     return;
   }
   try{
@@ -222,14 +285,19 @@ function render(){
 function add(){
   let t=document.getElementById("noteText").value.trim();
   if(!t)return;
-  notes.push(t);
+  notes.unshift({text:t,time:new Date().toLocaleString()});
   document.getElementById("noteText").value="";
   show();
 }
 
 function show(){
-  document.getElementById("noteList").innerHTML=
-    notes.map(n=>`<div class="note">${n}</div>`).join("");
+  document.getElementById("noteList").innerHTML =
+    notes.length
+    ? notes.map(n=>`
+      <div class="note">
+        <div class="note-time">${n.time}</div>${n.text}
+      </div>`).join("")
+    : `<div class="empty">No entries detected</div>`;
 }
 
 function exit(){
