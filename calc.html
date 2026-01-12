@@ -1,319 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Calculator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ---------- GLOBAL ---------- */
-body {
-  background: radial-gradient(circle at top, #141414, #0b0b0b);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-family: "Segoe UI", sans-serif;
-  overflow: hidden;
+body{
+  background:#0f0f0f;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  font-family:Segoe UI, Roboto, sans-serif;
+  color:#fff;
 }
 
-/* Subtle CSI watermark */
-body::before {
-  content: "CSI";
-  position: fixed;
-  font-size: 18rem;
-  font-weight: 800;
-  color: rgba(255,255,255,0.015);
-  letter-spacing: 1rem;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-15deg);
-  pointer-events: none;
-  user-select: none;
+.container{
+  position:relative;
 }
 
 /* ---------- CALCULATOR ---------- */
-.calculator, .notes {
-  background: #181818;
-  width: 330px;
-  border-radius: 14px;
-  padding: 15px;
-  color: #fff;
-  box-shadow: 0 0 30px rgba(0,0,0,0.8);
-  position: relative;
+.calculator{
+  width:320px;
+  background:#1b1b1b;
+  border-radius:8px;
+  padding:10px;
 }
 
-.display {
-  background: linear-gradient(145deg, #000, #111);
-  padding: 10px;
-  border-radius: 8px;
-  min-height: 90px;
-  margin-bottom: 12px;
+.display{
+  background:#000;
+  border-radius:6px;
+  padding:10px;
+  min-height:80px;
 }
 
-.history {
-  font-size: 12px;
-  max-height: 45px;
-  overflow-y: auto;
-  opacity: 0.6;
+.history{
+  font-size:12px;
+  color:#aaa;
+  text-align:right;
 }
 
-.input {
-  font-size: 24px;
-  text-align: right;
-  word-wrap: break-word;
-  margin-top: 5px;
+.input{
+  font-size:28px;
+  text-align:right;
+  margin-top:6px;
+  word-break:break-all;
 }
 
-.buttons {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+.buttons{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+  margin-top:10px;
 }
 
-button {
-  padding: 15px;
-  font-size: 18px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #262626;
-  color: white;
-  transition: transform 0.1s, box-shadow 0.1s;
+button{
+  height:52px;
+  font-size:18px;
+  background:#2a2a2a;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
 }
 
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 8px rgba(255,255,255,0.05);
+button:active{ background:#3a3a3a; }
+.operator{ background:#333; }
+.equal{ background:#0078d4; grid-column:span 4; }
+.clear{ background:#8b0000; }
+
+.hidden{ display:none; }
+
+/* ---------- VAULT ---------- */
+.notes{
+  width:320px;
+  background:#1b1b1b;
+  border-radius:8px;
+  padding:10px;
+  animation:fadeIn 0.4s ease;
 }
 
-.operator { background: #333; }
-.equal { background: linear-gradient(145deg, #ff9500, #ff7a00); }
-.clear { background: #b71c1c; }
-
-/* ---------- NOTES VAULT ---------- */
-.notes {
-  backdrop-filter: blur(12px);
-  animation: fadeIn 0.6s ease;
+.notes h3{
+  font-weight:400;
+  font-size:14px;
+  opacity:0.6;
+  text-align:center;
 }
 
-.notes h2 {
-  text-align: center;
-  margin-bottom: 10px;
-  letter-spacing: 2px;
-  font-weight: 600;
-  opacity: 0.9;
+.notes textarea{
+  width:100%;
+  height:80px;
+  background:#000;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  padding:8px;
+  margin-top:8px;
+  resize:none;
 }
 
-.notes textarea {
-  width: 100%;
-  height: 70px;
-  background: rgba(0,0,0,0.7);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.08);
-  padding: 10px;
-  border-radius: 8px;
-  resize: none;
-  outline: none;
-  transition: box-shadow 0.2s;
+.note{
+  background:#222;
+  padding:8px;
+  border-radius:6px;
+  margin-top:6px;
+  font-size:14px;
 }
 
-.notes textarea:focus {
-  box-shadow: 0 0 12px rgba(255,149,0,0.4);
+/* ---------- VAULT TRANSITION ---------- */
+.overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  letter-spacing:2px;
+  opacity:0;
+  pointer-events:none;
 }
 
-.notes button {
-  width: 100%;
-  margin-top: 10px;
-  background: linear-gradient(145deg, #ff9500, #ff7a00);
+.overlay.active{
+  animation:unlock 0.8s ease forwards;
 }
 
-.note {
-  background: rgba(255,255,255,0.05);
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 8px;
-  border-left: 3px solid #ff9500;
-  animation: slideUp 0.3s ease;
+@keyframes unlock{
+  0%{opacity:0}
+  20%{opacity:1}
+  80%{opacity:1}
+  100%{opacity:0}
 }
 
-.note div {
-  outline: none;
-}
-
-.note button {
-  background: #444;
-  margin-top: 5px;
-  font-size: 12px;
-}
-
-.hidden { display: none; }
-
-/* ---------- ANIMATIONS ---------- */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fadeIn{
+  from{opacity:0; transform:scale(0.98)}
+  to{opacity:1; transform:scale(1)}
 }
 </style>
 </head>
 
 <body>
 
-<!-- CALCULATOR -->
-<div class="calculator" id="calculator">
-  <div class="display">
-    <div class="history" id="history"></div>
-    <div class="input" id="input"></div>
+<div class="container">
+  <div class="overlay" id="overlay">ACCESSING</div>
+
+  <div class="calculator" id="calc">
+    <div class="display">
+      <div class="history" id="history"></div>
+      <div class="input" id="input"></div>
+    </div>
+
+    <div class="buttons">
+      <button onclick="p('7')">7</button>
+      <button onclick="p('8')">8</button>
+      <button onclick="p('9')">9</button>
+      <button class="operator" onclick="p('/')">÷</button>
+
+      <button onclick="p('4')">4</button>
+      <button onclick="p('5')">5</button>
+      <button onclick="p('6')">6</button>
+      <button class="operator" onclick="p('*')">×</button>
+
+      <button onclick="p('1')">1</button>
+      <button onclick="p('2')">2</button>
+      <button onclick="p('3')">3</button>
+      <button class="operator" onclick="p('-')">−</button>
+
+      <button onclick="p('0')">0</button>
+      <button onclick="del()">DEL</button>
+      <button class="clear" onclick="clr()">C</button>
+      <button class="operator" onclick="p('+')">+</button>
+
+      <button class="equal" onclick="calc()">=</button>
+    </div>
   </div>
 
-  <div class="buttons">
-    <button onclick="press('7')">7</button>
-    <button onclick="press('8')">8</button>
-    <button onclick="press('9')">9</button>
-    <button class="operator" onclick="press('/')">/</button>
-
-    <button onclick="press('4')">4</button>
-    <button onclick="press('5')">5</button>
-    <button onclick="press('6')">6</button>
-    <button class="operator" onclick="press('*')">*</button>
-
-    <button onclick="press('1')">1</button>
-    <button onclick="press('2')">2</button>
-    <button onclick="press('3')">3</button>
-    <button class="operator" onclick="press('-')">-</button>
-
-    <button onclick="press('0')">0</button>
-    <button onclick="del()">DEL</button>
-    <button class="clear" onclick="clearAll()">C</button>
-    <button class="operator" onclick="press('+')">+</button>
-
-    <button class="equal" style="grid-column: span 4" onclick="calculate()">=</button>
+  <div class="notes hidden" id="notes">
+    <h3>Notes</h3>
+    <textarea id="noteText" placeholder="Write something..."></textarea>
+    <button style="width:100%;margin-top:6px" onclick="add()">Save</button>
+    <div id="noteList"></div>
+    <button style="width:100%;margin-top:6px" onclick="exit()">Back</button>
   </div>
-</div>
-
-<!-- SECRET NOTES -->
-<div class="notes hidden" id="notes">
-  <h2>VAULT</h2>
-  <textarea id="noteInput" placeholder="Write a secret..."></textarea>
-  <button onclick="addNote()">Store Note</button>
-  <div id="notesList"></div>
-  <button onclick="exitNotes()" style="background:#333;margin-top:12px;">Exit</button>
 </div>
 
 <script>
-let input = localStorage.getItem("calc_input") || "";
-let history = JSON.parse(localStorage.getItem("calc_history") || "[]");
-let notes = JSON.parse(localStorage.getItem("secret_notes") || "[]");
+let input="",history=[],notes=[];
+const inputEl=document.getElementById("input");
+const historyEl=document.getElementById("history");
+const overlay=document.getElementById("overlay");
 
-const inputEl = document.getElementById("input");
-const historyEl = document.getElementById("history");
-const calc = document.getElementById("calculator");
-const notesScreen = document.getElementById("notes");
-const notesList = document.getElementById("notesList");
+function p(v){input+=v;u();}
+function del(){input=input.slice(0,-1);u();}
+function clr(){input="";u();}
 
-updateDisplay();
-renderHistory();
-renderNotes();
-
-function press(val) {
-  input += val;
-  saveInput();
-  updateDisplay();
-}
-
-function del() {
-  input = input.slice(0, -1);
-  saveInput();
-  updateDisplay();
-}
-
-function clearAll() {
-  input = "";
-  saveInput();
-  updateDisplay();
-}
-
-function calculate() {
-  if (input === "69/67") {
-    openNotes();
+function calc(){
+  if(input==="69/67"){
+    overlay.classList.add("active");
+    setTimeout(()=>{
+      document.getElementById("calc").classList.add("hidden");
+      document.getElementById("notes").classList.remove("hidden");
+      overlay.classList.remove("active");
+    },700);
     return;
   }
-
-  try {
-    const result = eval(input);
-    history.unshift(`${input} = ${result}`);
-    history = history.slice(0, 10);
-    localStorage.setItem("calc_history", JSON.stringify(history));
-    input = result.toString();
-  } catch {
-    input = "Error";
-  }
-
-  saveInput();
-  updateDisplay();
-  renderHistory();
+  try{
+    let r=eval(input);
+    history.unshift(input+" = "+r);
+    history=history.slice(0,4);
+    input=r.toString();
+  }catch{input="Error";}
+  render();u();
 }
 
-function updateDisplay() {
-  inputEl.textContent = input;
+function u(){inputEl.textContent=input;}
+function render(){
+  historyEl.innerHTML=history.map(h=>`<div>${h}</div>`).join("");
 }
 
-function renderHistory() {
-  historyEl.innerHTML = history.map(h => `<div>${h}</div>`).join("");
+function add(){
+  let t=document.getElementById("noteText").value.trim();
+  if(!t)return;
+  notes.push(t);
+  document.getElementById("noteText").value="";
+  show();
 }
 
-function saveInput() {
-  localStorage.setItem("calc_input", input);
+function show(){
+  document.getElementById("noteList").innerHTML=
+    notes.map(n=>`<div class="note">${n}</div>`).join("");
 }
 
-/* NOTES */
-
-function openNotes() {
-  calc.classList.add("hidden");
-  notesScreen.classList.remove("hidden");
-}
-
-function exitNotes() {
-  calc.classList.remove("hidden");
-  notesScreen.classList.add("hidden");
-}
-
-function addNote() {
-  const text = document.getElementById("noteInput").value.trim();
-  if (!text) return;
-  notes.push(text);
-  localStorage.setItem("secret_notes", JSON.stringify(notes));
-  document.getElementById("noteInput").value = "";
-  renderNotes();
-}
-
-function renderNotes() {
-  notesList.innerHTML = "";
-  notes.forEach((note, i) => {
-    const div = document.createElement("div");
-    div.className = "note";
-    div.innerHTML = `
-      <div contenteditable="true" onblur="editNote(${i}, this.textContent)">${note}</div>
-      <button onclick="deleteNote(${i})">Delete</button>
-    `;
-    notesList.appendChild(div);
-  });
-}
-
-function editNote(i, text) {
-  notes[i] = text;
-  localStorage.setItem("secret_notes", JSON.stringify(notes));
-}
-
-function deleteNote(i) {
-  notes.splice(i, 1);
-  localStorage.setItem("secret_notes", JSON.stringify(notes));
-  renderNotes();
+function exit(){
+  document.getElementById("notes").classList.add("hidden");
+  document.getElementById("calc").classList.remove("hidden");
 }
 </script>
 
